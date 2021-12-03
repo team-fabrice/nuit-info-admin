@@ -1,0 +1,40 @@
+@use crate::model::User;
+@use crate::routes::admin::Section;
+@use crate::templates::base;
+
+@(user: &User, page: Content, section: Section, title: Option<&str>)
+
+@:base({
+<div class="pt-4 container-lg p-responsive clearfix">
+    <div class="d-md-flex flex-items-center flex-justify-between mt-1 mb-4">
+        <div class="flex-auto">
+            <h1 class="h3 lh-condensed">@user.name.as_deref().unwrap_or(&user.email)</h1>
+            <div class="d-flex flex-items-center flex-wrap">
+                <p class="color-fg-muted mb-0 mr-3">@if user.is_admin { Compte admin } else { Compte contributeur }</p>
+            </div>
+        </div>
+        <div>
+            <a href="/" class="btn btn-sm btn-primary">Retour au site</a>
+            <a href="/admin/logout" class="btn btn-sm">Se déconnecter</a>
+        </div>
+    </div>
+    <main class="d-flex flex-md-row flex-column px-md-0 px-3">
+        <aside class="col-md-3 col-12 pr-md-4 pr-0">
+            <nav class="menu position-relative">
+                <span class="menu-heading">Administration</span>
+                <a class="menu-item @section.selected(Section::Dashboard)" href="/admin">@Section::Dashboard.short_name()</a>
+                <a class="menu-item @section.selected(Section::Articles)" href="/admin/articles">@Section::Articles.short_name()</a>
+                <a class="menu-item @section.selected(Section::Media)" href="/admin/media">@Section::Media.short_name()</a>
+                <a class="menu-item @section.selected(Section::Contributions)" href="/admin/contributions">@Section::Contributions.short_name()</a>
+                <a class="menu-item @section.selected(Section::Users)" href="/admin/users">@Section::Users.short_name()</a>
+            </nav>
+        </aside>
+        <div class="col-md-9 col-12">
+            <div class="Subhead mt-0 mb-0">
+                <h2 class="Subhead-heading">@section.long_name()</h2>
+            </div>
+            @:page()
+        </div>
+    </main>
+</div>
+}, Some(title.unwrap_or(section.short_name())))

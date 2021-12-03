@@ -1,0 +1,11 @@
+@use crate::templates::base;
+
+@()
+
+@:base({
+<form method="post">
+    <input type="text" name="email">
+    <input type="password" name="password">
+    <input type="submit">
+</form>
+}, Some("Connection"))

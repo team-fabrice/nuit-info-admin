@@ -1,0 +1,9 @@
+@use crate::model::User;
+@use crate::routes::admin::Section;
+@use crate::templates::base_sidebar;
+
+@(user: &User)
+
+@:base_sidebar(user, {
+    Dashboard
+}, Section::Dashboard, None)

@@ -27,6 +27,14 @@ table! {
 }
 
 table! {
+    sessions (session) {
+        session -> Uuid,
+        account -> Uuid,
+        expires -> Timestamptz,
+    }
+}
+
+table! {
     users (id) {
         id -> Uuid,
         email -> Varchar,
@@ -37,9 +45,11 @@ table! {
 }
 
 joinable!(article_rev -> users (modification_author));
+joinable!(sessions -> users (account));
 
 allow_tables_to_appear_in_same_query!(
     article_rev,
     media,
+    sessions,
     users,
 );

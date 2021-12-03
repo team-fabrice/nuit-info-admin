@@ -8,21 +8,33 @@ extern crate rocket;
 #[macro_use]
 extern crate rocket_sync_db_pools;
 
+mod model;
+mod routes;
+mod ructe;
 mod schema;
 
-use crate::diesel::{QueryDsl, RunQueryDsl};
-use diesel::expression::count::count_star;
+use crate::model::User;
+use crate::ructe::Ructe;
 
 #[cfg(not(debug_assertions))]
 embed_migrations!();
 
+pub type Connection = rocket_sync_db_pools::diesel::PgConnection;
 #[database("nuit-info")]
-struct Database(rocket_sync_db_pools::diesel::PgConnection);
+pub struct Database(Connection);
 
 #[rocket::launch]
 fn launch() -> _ {
     let rocket = rocket::build()
-        .mount("/", routes![index])
+        .mount(
+            "/admin",
+            routes![
+                index,
+                routes::account::login,
+                routes::account::login_post,
+                routes::account::logout,
+            ],
+        )
         .attach(Database::fairing());
 
     #[cfg(debug_assertions)]
@@ -48,13 +60,8 @@ fn launch() -> _ {
 }
 
 #[get("/")]
-async fn index(db: Database) -> String {
-    db.run(|c| {
-        use crate::schema::users::dsl::users;
-
-        users.select(count_star()).first::<i64>(c)
-    })
-    .await
-    .unwrap()
-    .to_string()
+async fn index(user: User) -> Ructe {
+    render!(sidebar::dashboard(&user))
 }
+
+include!(concat!(env!("OUT_DIR"), "/templates.rs"));
