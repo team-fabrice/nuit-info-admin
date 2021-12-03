@@ -35,6 +35,7 @@ fn launch() -> _ {
                 routes::admin::articles_edit,
                 routes::admin::contributions,
                 routes::admin::dashboard,
+                routes::admin::contributions_mark,
             ],
         )
         .attach(Database::fairing());
