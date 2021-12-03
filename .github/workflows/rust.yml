@@ -38,9 +38,9 @@ jobs:
     - name: Build
       run: cargo build --verbose --release
     - name: Stop the server
-      run: ssh staging 'sudo systemctl stop nuit_info'
+      run: ssh staging 'sudo /bin/systemctl stop nuit_info'
     - name: Check out the source
       run: scp target/release/nuit-info-admin staging:/srv/nuit-info/
     - name: Start the server
       if: ${{ always() }}
-      run: ssh staging 'sudo systemctl start nuit_info'
+      run: ssh staging 'sudo /bin/systemctl start nuit_info'
