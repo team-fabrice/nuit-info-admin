@@ -1,0 +1,46 @@
+name: Rust
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  CARGO_TERM_COLOR: always
+  SSH_USER: nuit_info
+  SSH_KEY: ${{ secrets.SSH_KEY }}
+  SSH_HOST: edgar.bzh
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - uses: Swatinem/rust-cache@v1
+    - name: Configure SSH
+      run: |
+        mkdir -p ~/.ssh/
+        echo "$SSH_KEY" > ~/.ssh/staging.key
+        chmod 600 ~/.ssh/staging.key
+        cat >>~/.ssh/config <<END
+        Host staging
+          HostName $SSH_HOST
+          User $SSH_USER
+          IdentityFile ~/.ssh/staging.key
+          StrictHostKeyChecking no
+        END
+    - name: Build
+      run: cargo build --verbose --release
+    - name: Stop the server
+      run: ssh staging 'sudo systemctl stop nuit_info'
+    - name: Check out the source
+      run: scp target/release/nuit-info-admin staging:/srv/nuit-info/
+    - name: Start the server
+      if: ${{ always() }}
+      run: ssh staging 'sudo systemctl start nuit_info'
