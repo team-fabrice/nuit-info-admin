@@ -8,10 +8,10 @@ bcrypt = "0.10.1"
 chrono = "0.4.19"
 diesel = { version = "1.4.8", features = ["uuidv07", "chrono", "postgres"] }
 diesel_migrations = "1.4.0"
-rocket = { version = "0.5.0-rc.1", features = ["secrets"] }
+rocket = { version = "0.5.0-rc.1", features = ["secrets", "uuid"] }
 rocket_sync_db_pools = { version = "0.1.0-rc.1", features = ["diesel_postgres_pool"] }
 ructe = "0.13.4"
-uuid = "0.8.2"
+uuid = { version = "0.8.2", features = ["v4"] }
 
 [build-dependencies]
 ructe = "0.13.4"

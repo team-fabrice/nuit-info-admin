@@ -13,9 +13,6 @@ mod routes;
 mod ructe;
 mod schema;
 
-use crate::model::User;
-use crate::ructe::Ructe;
-
 #[cfg(not(debug_assertions))]
 embed_migrations!();
 
@@ -29,10 +26,15 @@ fn launch() -> _ {
         .mount(
             "/admin",
             routes![
-                index,
                 routes::account::login,
                 routes::account::login_post,
                 routes::account::logout,
+                routes::admin::articles,
+                routes::admin::articles_delete,
+                routes::admin::articles_new,
+                routes::admin::articles_edit,
+                routes::admin::contributions,
+                routes::admin::dashboard,
             ],
         )
         .attach(Database::fairing());
@@ -57,11 +59,6 @@ fn launch() -> _ {
             })
         }))
     }
-}
-
-#[get("/")]
-async fn index(user: User) -> Ructe {
-    render!(sidebar::dashboard(&user))
 }
 
 include!(concat!(env!("OUT_DIR"), "/templates.rs"));

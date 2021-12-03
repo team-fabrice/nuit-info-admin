@@ -1,4 +1,4 @@
-use chrono::{NaiveDateTime, Utc};
+use chrono::{NaiveDate, NaiveDateTime, Utc};
 use diesel::prelude::*;
 use uuid::Uuid;
 
@@ -69,5 +69,116 @@ impl Session {
             .ok()?;
 
         User::by_id(c, session.account)
+    }
+}
+
+#[derive(Debug, Queryable)]
+pub struct ArticleRev {
+    pub revision_di: Uuid,
+    pub article_id: Uuid,
+    pub title: String,
+    pub contents: String,
+    pub created_at: NaiveDate,
+    pub updated_at: NaiveDate,
+    pub modification_author: Option<Uuid>,
+
+    meta_class: Option<String>,
+    meta_person_first_name: Option<String>,
+    meta_person_last_name: Option<String>,
+    meta_person_birth: Option<NaiveDate>,
+    meta_person_death: Option<NaiveDate>,
+    meta_event_date: Option<NaiveDate>,
+    meta_location: Option<String>,
+}
+
+impl ArticleRev {
+    pub fn list(c: &crate::Connection) -> Option<Vec<Self>> {
+        use crate::schema::article_rev::dsl as a_dsl;
+
+        a_dsl::article_rev
+            .filter(a_dsl::modification_author.is_null())
+            .load::<Self>(c)
+            .ok()
+    }
+
+    pub fn list_contributions(c: &crate::Connection, for_user: Option<Uuid>) -> Option<Vec<Self>> {
+        use crate::schema::article_rev::dsl as a_dsl;
+
+        if let Some(for_user) = for_user {
+            a_dsl::article_rev
+                .filter(a_dsl::modification_author.eq(for_user))
+                .load::<Self>(c)
+        } else {
+            a_dsl::article_rev
+                .filter(a_dsl::modification_author.is_not_null())
+                .load::<Self>(c)
+        }
+        .ok()
+    }
+
+    pub fn edit(c: &crate::Connection, id: Uuid, title: String, contents: String) -> Option<()> {
+        use crate::schema::article_rev::dsl as a_dsl;
+
+        diesel::update(a_dsl::article_rev)
+            .filter(a_dsl::article_id.eq(id))
+            .set((a_dsl::title.eq(title), a_dsl::contents.eq(contents)))
+            .execute(c)
+            .ok()
+            .map(|_| ())
+    }
+
+    pub fn insert(
+        c: &crate::Connection,
+        title: String,
+        contents: String,
+        article: Option<Uuid>,
+        author: Option<Uuid>,
+    ) -> Option<()> {
+        use crate::schema::article_rev;
+        use crate::schema::article_rev::dsl as a_dsl;
+
+        let article = article.unwrap_or_else(|| Uuid::new_v4());
+
+        #[derive(Insertable)]
+        #[table_name = "article_rev"]
+        struct NewArticle {
+            article_id: Uuid,
+            title: String,
+            contents: String,
+            created_at: NaiveDate,
+            updated_at: NaiveDate,
+            modification_author: Option<Uuid>,
+        }
+
+        diesel::insert_into(a_dsl::article_rev)
+            .values(NewArticle {
+                title,
+                article_id: article,
+                contents,
+                created_at: Utc::now().date().naive_utc(),
+                updated_at: Utc::now().date().naive_utc(),
+                modification_author: author,
+            })
+            .execute(c)
+            .ok()
+            .map(|_| ())
+    }
+
+    pub fn delete(c: &crate::Connection, id: Uuid) -> Option<()> {
+        use crate::schema::article_rev::dsl as a_dsl;
+
+        diesel::delete(a_dsl::article_rev)
+            .filter(a_dsl::article_id.eq(id))
+            .execute(c)
+            .ok()
+            .map(|_| ())
+    }
+
+    pub fn class(&self) -> Option<&'static str> {
+        match self.meta_class.as_deref() {
+            Some("person") => Some("Personne"),
+            Some("event") => Some("Événement"),
+            _ => None,
+        }
     }
 }

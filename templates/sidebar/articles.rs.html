@@ -1,0 +1,26 @@
+@use crate::model::{User, ArticleRev};
+@use crate::routes::admin::Section;
+@use crate::templates::base_sidebar;
+
+@(user: &User, articles: &[ArticleRev])
+
+@:base_sidebar(user, {
+<ul class="Box list-style-none">
+    @for article in articles {
+    <li class="Box-row d-flex flex-row flex-justify-between">
+        <h4>
+            <a href="/article/@article.article_id">
+                <span>@article.title</span>
+            </a>
+            @if let Some(class) = article.class() {
+            <span class="Label Label--inline">@class</span>
+            }
+        </h4>
+        <form action="/admin/articles/@article.article_id" method="post">
+            <a type="submit" class="btn btn-sm" href="/article/@article.article_id/edit">Modifier</a>
+            @if user.is_admin { <button type="submit" name="delete" class="btn btn-sm btn-danger">Supprimer</button> }
+        </form>
+    </li>
+    }
+</ul>
+}, Section::Articles, None)

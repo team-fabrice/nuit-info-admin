@@ -1,0 +1,10 @@
+@use crate::model::{User, ArticleRev};
+@use crate::routes::admin::Section;
+@use crate::templates::base_sidebar;
+
+@(user: &User, contributions: &[ArticleRev])
+
+@:base_sidebar(user, {
+Contributions
+@format!("{:?}", &contributions)
+}, Section::Contributions, None)

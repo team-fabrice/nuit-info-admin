@@ -25,12 +25,12 @@
                 <a class="menu-item @section.selected(Section::Dashboard)" href="/admin">@Section::Dashboard.short_name()</a>
                 <a class="menu-item @section.selected(Section::Articles)" href="/admin/articles">@Section::Articles.short_name()</a>
                 <a class="menu-item @section.selected(Section::Media)" href="/admin/media">@Section::Media.short_name()</a>
-                <a class="menu-item @section.selected(Section::Contributions)" href="/admin/contributions">@Section::Contributions.short_name()</a>
-                <a class="menu-item @section.selected(Section::Users)" href="/admin/users">@Section::Users.short_name()</a>
+                <a class="menu-item @section.selected(Section::Contributions)" href="/admin/contributions">@Section::Contributions.short_name() <span class="Counter mr-1">2</span></a>
+                @if user.is_admin { <a class="menu-item @section.selected(Section::Users)" href="/admin/users">@Section::Users.short_name()</a> }
             </nav>
         </aside>
         <div class="col-md-9 col-12">
-            <div class="Subhead mt-0 mb-0">
+            <div class="Subhead mt-0 mb-2">
                 <h2 class="Subhead-heading">@section.long_name()</h2>
             </div>
             @:page()
