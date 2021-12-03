@@ -59,7 +59,7 @@ pub struct DeleteForm {
     delete: Option<String>,
 }
 
-#[post("/admin/articles/<id>", data = "<data>")]
+#[post("/articles/<id>", data = "<data>")]
 pub async fn articles_delete(
     db: Database,
     data: Form<DeleteForm>,
@@ -79,7 +79,7 @@ pub struct EditForm {
     contents: String,
 }
 
-#[post("/admin/articles/new", data = "<data>")]
+#[post("/articles/new", data = "<data>")]
 pub async fn articles_new(db: Database, user: User, data: Form<EditForm>) -> Redirect {
     let data = data.into_inner();
     let is_admin = user.is_admin;
@@ -100,7 +100,7 @@ pub async fn articles_new(db: Database, user: User, data: Form<EditForm>) -> Red
     }
 }
 
-#[post("/admin/articles/<id>/edit", data = "<data>")]
+#[post("/articles/<id>/edit", data = "<data>")]
 pub async fn articles_edit(db: Database, id: Uuid, user: User, data: Form<EditForm>) -> Redirect {
     let data = data.into_inner();
     let is_admin = user.is_admin;
