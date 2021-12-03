@@ -5,6 +5,25 @@
 @(user: &User, contributions: &[ArticleRev])
 
 @:base_sidebar(user, {
-Contributions
-@format!("{:?}", &contributions)
+<ul class="Box list-style-none">
+    @for article in contributions {
+    <li class="Box-row d-flex flex-row flex-justify-between">
+        <h4>
+            <a href="/article/@article.article_id">
+                <span>@article.title</span>
+            </a>
+            @if let Some(class) = article.class() {
+            <span class="Label Label--inline">@class</span>
+            }
+            <span class="Label Label--inline Label--info">by Michel</span>
+        </h4>
+        @if user.is_admin {
+        <form action="/admin/rev/@article.revision_id" method="post">
+            <button type="submit" name="accept" class="btn btn-sm">Accepter</button>
+            <button type="submit" name="reject" class="btn btn-sm btn-danger">Rejeter</button>
+        </form>
+        }
+    </li>
+    }
+</ul>
 }, Section::Contributions, None)

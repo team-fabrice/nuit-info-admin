@@ -135,3 +135,43 @@ pub async fn contributions(db: Database, user: User) -> Ructe {
 
     render!(sidebar::contributions(&user, &contributions))
 }
+
+#[derive(FromForm)]
+pub struct MarkForm {
+    accept: Option<String>,
+    reject: Option<String>,
+}
+
+#[post("/rev/<id>", data = "<data>")]
+pub async fn contributions_mark(
+    db: Database,
+    id: Uuid,
+    user: User,
+    data: Form<MarkForm>,
+) -> Redirect {
+    let accept = match data.into_inner() {
+        _ if !user.is_admin => None,
+        MarkForm {
+            accept: Some(_),
+            reject: None,
+        } => Some(true),
+        MarkForm {
+            reject: Some(_),
+            accept: None,
+        } => Some(false),
+        _ => None,
+    };
+
+    if let Some(accept) = accept {
+        db.run(move |c| {
+            if accept {
+                ArticleRev::accept(c, id);
+            } else {
+                ArticleRev::delete_by_rev(c, id).ok();
+            }
+        })
+        .await;
+    }
+
+    Redirect::to("/admin/contributions")
+}

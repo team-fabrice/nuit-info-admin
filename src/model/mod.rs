@@ -74,7 +74,7 @@ impl Session {
 
 #[derive(Debug, Queryable)]
 pub struct ArticleRev {
-    pub revision_di: Uuid,
+    pub revision_id: Uuid,
     pub article_id: Uuid,
     pub title: String,
     pub contents: String,
@@ -172,6 +172,30 @@ impl ArticleRev {
             .execute(c)
             .ok()
             .map(|_| ())
+    }
+
+    pub fn delete_by_rev(c: &crate::Connection, rev_id: Uuid) -> diesel::result::QueryResult<()> {
+        use crate::schema::article_rev::dsl as a_dsl;
+
+        diesel::delete(a_dsl::article_rev)
+            .filter(a_dsl::revision_id.eq(rev_id))
+            .execute(c)
+            .map(|_| ())
+    }
+
+    pub fn accept(c: &crate::Connection, rev_id: Uuid) -> Option<()> {
+        use crate::schema::article_rev::dsl as a_dsl;
+
+        c.transaction(|| {
+            Self::delete_by_rev(c, rev_id)?;
+
+            diesel::update(a_dsl::article_rev)
+                .filter(a_dsl::revision_id.eq(rev_id))
+                .set((a_dsl::modification_author.eq(Option::<Uuid>::None),))
+                .execute(c)
+        })
+        .ok()
+        .map(|_| ())
     }
 
     pub fn class(&self) -> Option<&'static str> {
