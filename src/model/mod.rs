@@ -187,7 +187,11 @@ impl ArticleRev {
         use crate::schema::article_rev::dsl as a_dsl;
 
         c.transaction(|| {
-            Self::delete_by_rev(c, rev_id)?;
+            let art = a_dsl::article_rev
+                .filter(a_dsl::revision_id.eq(rev_id))
+                .select(a_dsl::article_id)
+                .first::<Uuid>(c)?;
+            Self::delete_by_rev(c, art)?;
 
             diesel::update(a_dsl::article_rev)
                 .filter(a_dsl::revision_id.eq(rev_id))
